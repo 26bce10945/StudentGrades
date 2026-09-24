@@ -1,0 +1,243 @@
+# main.py
+# Main entry point of the Student Record Management System
+
+from student_manager import StudentManager
+from utilities import (
+    get_valid_student_id,
+    get_valid_name,
+    get_valid_age,
+    get_valid_marks,
+    get_valid_course,
+    get_valid_menu_choice,
+    get_valid_search_choice,
+    display_menu,
+    display_student_info,
+    display_statistics
+)
+
+def add_student_option(manager):
+    """
+    Handle the 'Add Student' menu option.
+    
+    Parameters:
+        manager (StudentManager): The student manager instance
+    """
+    print("\n--- Add New Student ---")
+    
+    # Get validated input from user
+    student_id = get_valid_student_id()
+    name = get_valid_name()
+    age = get_valid_age()
+    course = get_valid_course()
+    marks = get_valid_marks()
+    
+    # Try to add the student
+    success = manager.add_student(student_id, name, age, course, marks)
+    
+    if success:
+        print("✓ Student added successfully!")
+    else:
+        print("❌ Error: A student with this ID already exists.")
+
+
+def view_all_students_option(manager):
+    """
+    Handle the 'View All Students' menu option.
+    
+    Parameters:
+        manager (StudentManager): The student manager instance
+    """
+    print("\n--- All Students ---")
+    
+    students = manager.get_all_students()
+    
+    # Check if list is empty
+    if len(students) == 0:
+        print("No students in the system yet.")
+    else:
+        # Loop through and display each student
+        for student in students:
+            student.display_info()
+
+
+def search_student_option(manager):
+    """
+    Handle the 'Search Student' menu option.
+    
+    Parameters:
+        manager (StudentManager): The student manager instance
+    """
+    print("\n--- Search Student ---")
+    
+    # Ask user how to search
+    search_type = get_valid_search_choice()
+    
+    if search_type == "id":
+        # Search by ID
+        student_id = get_valid_student_id()
+        student = manager.search_by_id(student_id)
+        
+        if student is not None:
+            print("\n✓ Student found:")
+            student.display_info()
+        else:
+            print(f"❌ No student found with ID {student_id}")
+    
+    else:  # search_type == "name"
+        # Search by name
+        name = input("Enter name to search: ")
+        matching_students = manager.search_by_name(name)
+        
+        if len(matching_students) == 0:
+            print(f"❌ No students found with name containing '{name}'")
+        else:
+            print(f"\n✓ Found {len(matching_students)} student(s):")
+            for student in matching_students:
+                student.display_info()
+
+
+def update_student_option(manager):
+    """
+    Handle the 'Update Student' menu option.
+    
+    Parameters:
+        manager (StudentManager): The student manager instance
+    """
+    print("\n--- Update Student ---")
+    
+    student_id = get_valid_student_id()
+    student = manager.search_by_id(student_id)
+    
+    if student is None:
+        print(f"❌ No student found with ID {student_id}")
+        return
+    
+    print("\nWhat would you like to update?")
+    print("1. Name")
+    print("2. Age")
+    print("3. Course")
+    print("4. Marks")
+    
+    choice = input("Enter your choice (1-4): ")
+    
+    # Using assignment operators to update based on choice
+    if choice == "1":
+        new_name = get_valid_name()
+        manager.update_student(student_id, name=new_name)
+        print("✓ Name updated successfully!")
+    
+    elif choice == "2":
+        new_age = get_valid_age()
+        manager.update_student(student_id, age=new_age)
+        print("✓ Age updated successfully!")
+    
+    elif choice == "3":
+        new_course = get_valid_course()
+        manager.update_student(student_id, course=new_course)
+        print("✓ Course updated successfully!")
+    
+    elif choice == "4":
+        new_marks = get_valid_marks()
+        manager.update_student(student_id, marks=new_marks)
+        print("✓ Marks updated successfully!")
+    
+    else:
+        print("❌ Invalid choice.")
+
+
+def delete_student_option(manager):
+    """
+    Handle the 'Delete Student' menu option.
+    
+    Parameters:
+        manager (StudentManager): The student manager instance
+    """
+    print("\n--- Delete Student ---")
+    
+    student_id = get_valid_student_id()
+    success = manager.delete_student(student_id)
+    
+    if success:
+        print("✓ Student deleted successfully!")
+    else:
+        print(f"❌ No student found with ID {student_id}")
+
+
+def calculate_result_option(manager):
+    """
+    Handle the 'Calculate Student Result' menu option.
+    
+    Parameters:
+        manager (StudentManager): The student manager instance
+    """
+    print("\n--- Calculate Student Result ---")
+    
+    student_id = get_valid_student_id()
+    student = manager.search_by_id(student_id)
+    
+    if student is None:
+        print(f"❌ No student found with ID {student_id}")
+    else:
+        display_student_info(student)
+
+
+def display_statistics_option(manager):
+    """
+    Handle the 'Display Class Statistics' menu option.
+    
+    Parameters:
+        manager (StudentManager): The student manager instance
+    """
+    print("\n--- Class Statistics ---")
+    
+    # Check if there are any students
+    if manager.is_empty():
+        print("❌ No students in the system yet.")
+    else:
+        stats = manager.get_statistics()
+        display_statistics(stats)
+
+
+def main():
+    """
+    Main function that runs the student record management system.
+    Contains the main menu loop.
+    """
+    # Create an instance of StudentManager
+    manager = StudentManager()
+    
+    # Main loop - continues until user exits
+    while True:
+        display_menu()
+        choice = get_valid_menu_choice()
+        
+        # Handle each menu choice
+        if choice == 1:
+            add_student_option(manager)
+        
+        elif choice == 2:
+            view_all_students_option(manager)
+        
+        elif choice == 3:
+            search_student_option(manager)
+        
+        elif choice == 4:
+            update_student_option(manager)
+        
+        elif choice == 5:
+            delete_student_option(manager)
+        
+        elif choice == 6:
+            calculate_result_option(manager)
+        
+        elif choice == 7:
+            display_statistics_option(manager)
+        
+        elif choice == 8:
+            print("\nThank you for using the Student Record Management System. Goodbye!")
+            break  # Exit the loop and end the program
+
+
+# Entry point of the program
+if __name__ == "__main__":
+    main()
