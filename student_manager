@@ -1,0 +1,220 @@
+# student_manager.py
+# Manages all student records and operations
+
+from student import Student
+
+class StudentManager:
+    """
+    A class to manage all student records in the system.
+    
+    Provides functionality for:
+    - Adding students
+    - Removing students
+    - Searching for students
+    - Updating student information
+    - Calculating statistics
+    """
+    
+    def __init__(self):
+        """
+        Initialize the StudentManager with an empty student list.
+        """
+        self.students = []  # List to store Student objects
+        self.student_ids = set()  # Set to track unique student IDs
+    
+    
+    def add_student(self, student_id, name, age, course, marks):
+        """
+        Add a new student to the system.
+        
+        Parameters:
+            student_id (int): Unique identifier
+            name (str): Student's name
+            age (int): Student's age
+            course (str): Course name
+            marks (float): Marks obtained
+        
+        Returns:
+            bool: True if added successfully, False if ID already exists
+        """
+        # Check if student ID already exists using membership operator
+        if student_id in self.student_ids:
+            return False
+        
+        # Create a new Student object
+        student = Student(student_id, name, age, course, marks)
+        
+        # Add to list and update set
+        self.students.append(student)
+        self.student_ids.add(student_id)
+        
+        return True
+    
+    
+    def delete_student(self, student_id):
+        """
+        Delete a student from the system by ID.
+        
+        Parameters:
+            student_id (int): ID of student to delete
+        
+        Returns:
+            bool: True if deleted, False if student not found
+        """
+        # Find the student with matching ID
+        for student in self.students:
+            if student.student_id == student_id:
+                self.students.remove(student)
+                self.student_ids.discard(student_id)
+                return True
+        
+        return False
+    
+    
+    def search_by_id(self, student_id):
+        """
+        Search for a student by ID.
+        
+        Parameters:
+            student_id (int): ID to search for
+        
+        Returns:
+            Student object if found, None otherwise
+        """
+        for student in self.students:
+            if student.student_id == student_id:
+                return student
+        
+        return None
+    
+    
+    def search_by_name(self, name):
+        """
+        Search for students by name (partial or full match).
+        
+        Parameters:
+            name (str): Name to search for
+        
+        Returns:
+            list: List of Student objects with matching names
+        """
+        matching_students = []
+        
+        # Iterate through all students
+        for student in self.students:
+            # Use membership operator to check if name is in student's name
+            if name.lower() in student.name.lower():
+                matching_students.append(student)
+        
+        return matching_students
+    
+    
+    def get_all_students(self):
+        """
+        Get all students in the system.
+        
+        Returns:
+            list: List of all Student objects
+        """
+        return self.students
+    
+    
+    def update_student(self, student_id, **kwargs):
+        """
+        Update a student's information.
+        
+        Parameters:
+            student_id (int): ID of student to update
+            **kwargs: Keyword arguments with fields to update
+                     Example: update_student(101, marks=90, age=20)
+        
+        Returns:
+            bool: True if updated, False if student not found
+        """
+        student = self.search_by_id(student_id)
+        
+        if student is None:
+            return False
+        
+        # Use the Student's update_info method
+        student.update_info(**kwargs)
+        return True
+    
+    
+    def get_statistics(self):
+        """
+        Calculate and return class statistics.
+        
+        Returns:
+            dict: Dictionary containing:
+                - 'total_students': Number of students
+                - 'average_marks': Average marks of all students
+                - 'highest_marks': Highest marks in class
+                - 'lowest_marks': Lowest marks in class
+                - 'passing_students': Count of students with marks >= 50
+                - 'failing_students': Count of students with marks < 50
+        """
+        # Initialize statistics
+        stats = {
+            'total_students': 0,
+            'average_marks': 0,
+            'highest_marks': 0,
+            'lowest_marks': 0,
+            'passing_students': 0,
+            'failing_students': 0
+        }
+        
+        # If no students, return empty stats
+        if len(self.students) == 0:
+            return stats
+        
+        # Count total students
+        stats['total_students'] = len(self.students)
+        
+        # Initialize marks list for calculations
+        marks_list = []
+        
+        # Iterate through students to collect data
+        for student in self.students:
+            marks = student.marks
+            marks_list.append(marks)
+            
+            # Count passing and failing students
+            if marks >= 50:
+                stats['passing_students'] += 1
+            else:
+                stats['failing_students'] += 1
+        
+        # Calculate average marks using arithmetic operations
+        total_marks = 0
+        for marks in marks_list:
+            total_marks = total_marks + marks  # Arithmetic addition
+        
+        stats['average_marks'] = total_marks / len(marks_list)
+        
+        # Find highest and lowest marks
+        stats['highest_marks'] = max(marks_list)
+        stats['lowest_marks'] = min(marks_list)
+        
+        return stats
+    
+    
+    def get_student_count(self):
+        """
+        Get the total number of students.
+        
+        Returns:
+            int: Number of students in the system
+        """
+        return len(self.students)
+    
+    
+    def is_empty(self):
+        """
+        Check if there are any students in the system.
+        
+        Returns:
+            bool: True if no students, False otherwise
+        """
+        # Using identity operator to compare with None
+        return len(self.students) == 0
